@@ -7,9 +7,38 @@
 """
 
 import os
+import sys
 import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+class _Tee:
+    """把 print 的内容同时写到屏幕和文件。"""
+
+    def __init__(self, *streams):
+        self.streams = streams
+
+    def write(self, s):
+        for st in self.streams:
+            st.write(s)
+            st.flush()
+
+    def flush(self):
+        for st in self.streams:
+            st.flush()
+
+    def isatty(self):
+        return False  # 有的库（如 transformers）会检查输出是否为终端
+
+    def __getattr__(self, name):
+        return getattr(self.streams[0], name)  # 其余属性（encoding 等）交给原来的屏幕输出
+
+
+def tee_stdout(filename):
+    """调用之后，所有 print 的内容都会同时保存到本文件夹下的 filename（每次运行覆盖）。"""
+    f = open(os.path.join(HERE, filename), "w", encoding="utf-8")
+    sys.stdout = _Tee(sys.__stdout__ or sys.stdout, f)
 CORPUS = os.path.join(HERE, "古文语料.txt")
 
 # 序列标注：给每个字一个标签，表示“这个字后面跟什么标点”，O 表示后面没有标点

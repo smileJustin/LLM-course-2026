@@ -22,7 +22,7 @@ os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 import torch
 from transformers import AutoModelForTokenClassification, AutoTokenizer, get_linear_schedule_with_warmup
 
-from common import HERE, LABEL2ID, LABELS, chunk, load_docs, score, split_docs, to_text
+from common import HERE, LABEL2ID, LABELS, chunk, load_docs, score, split_docs, tee_stdout, to_text
 
 
 def make_batch(tokenizer, samples, device):
@@ -70,6 +70,8 @@ def main():
     ap.add_argument("--lr", type=float, default=3e-5)
     ap.add_argument("--out", default=os.path.join(HERE, "bert_punct_model"))
     args = ap.parse_args()
+    tee_stdout("运行结果_train.txt")
+    print("参数：", vars(args))
 
     random.seed(42)
     torch.manual_seed(42)

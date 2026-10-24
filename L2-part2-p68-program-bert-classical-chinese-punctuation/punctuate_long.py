@@ -21,7 +21,8 @@ import time
 import torch
 from transformers import AutoModelForTokenClassification, AutoTokenizer
 
-from common import HERE, decode_by_overlap, decode_by_period, load_docs, score, split_docs, text_to_chars_labels, to_text
+from common import (HERE, decode_by_overlap, decode_by_period, load_docs, score, split_docs, tee_stdout,
+                    text_to_chars_labels, to_text)
 from train import predict
 
 
@@ -52,6 +53,8 @@ def main():
         return
 
     # ---- 在测试集的整篇长文上比较三种解码方式
+    tee_stdout("运行结果_punctuate_batch%d.txt" % args.batch_size)
+    print("设备：", torch.cuda.get_device_name(0) if device.type == "cuda" else "CPU")
     _, test = split_docs(load_docs())
     docs = [c for _, c, _ in test]
     golds = [l for _, _, l in test]
